@@ -56,7 +56,13 @@ export const getUserProfile = createAsyncThunk<UserState["user"], void>(
 const userSlice = createSlice({
   name: "user",
   initialState,
-  reducers: {},
+  reducers: {
+    logout: (state) => {
+      state.user = null;
+      state.error = null;
+      Cookies.remove("token");
+    },
+  },
   extraReducers: (builder) => {
     builder
       // Регистрация пользователя
@@ -102,4 +108,5 @@ const userSlice = createSlice({
   },
 });
 
+export const { logout } = userSlice.actions;
 export default userSlice.reducer;

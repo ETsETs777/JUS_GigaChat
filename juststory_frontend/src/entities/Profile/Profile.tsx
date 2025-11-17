@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserProfile } from "../../../lib/entities/user/userSlice";
+import { getUserProfile, logout } from "../../../lib/entities/user/userSlice";
 import { RootState } from "../../../lib/store";
 import { updateSubscription } from "../../../lib/entities/subscription/subscritpionSlice";
 import Cookies from "js-cookie";
@@ -52,7 +52,7 @@ const Profile = () => {
   }, [dispatch, router]);
 
   const handleLogout = () => {
-    Cookies.remove("token");
+    dispatch(logout());
     router.push("/login");
   };
 
