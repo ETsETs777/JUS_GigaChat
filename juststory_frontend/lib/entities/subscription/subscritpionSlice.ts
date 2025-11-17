@@ -1,16 +1,18 @@
-// src/store/subscriptionSlice.ts
 import { backendApiUrl } from "@/src/utils/backendApiUrl";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import Cookies from "js-cookie";
+
+interface Subscription {
+  id: number;
+  name: string;
+  price: string;
+  daysPeriod: number;
+  description: string;
+}
+
 interface SubscriptionState {
-  subscription: null | {
-    id: number;
-    name: string;
-    price: string;
-    daysPeriod: number;
-    description: string;
-  };
+  subscription: null | Subscription;
   loading: boolean;
   error: string | null;
 }
