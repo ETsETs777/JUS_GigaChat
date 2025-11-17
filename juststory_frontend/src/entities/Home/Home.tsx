@@ -19,11 +19,11 @@ const Home = () => {
 		if (token) {
 			validateToken(token).then(valid => {
 				if (!valid) {
-					//router.push('/login')
+					router.push('/login')
 				}
 			})
 		} else {
-			//router.push('/login')
+			router.push('/login')
 		}
 	}, [router])
 
