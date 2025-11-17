@@ -1146,9 +1146,9 @@ graph TB
         GIGACHAT[GigaChat AI API]
         
         subgraph "GigaChat Endpoints"
-            GC1[/chat/completions]
-            GC2[/images/generations]
-            GC3[/auth]
+            GC1["/chat/completions"]
+            GC2["/images/generations"]
+            GC3["/auth"]
         end
     end
 
