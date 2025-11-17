@@ -64,12 +64,11 @@ const BuySub: React.FC = () => {
       } else {
         alert("Ошибка при покупке подписки: " + response.data.message);
       }
-    } catch (error: any) {
-      // Указываем тип error как any
-      alert(
-        "Ошибка при покупке подписки: " +
-          (error.response?.data?.message || error.message)
-      );
+    } catch (error) {
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "Неизвестная ошибка";
+      alert("Ошибка при покупке подписки: " + errorMessage);
     }
   };
 
