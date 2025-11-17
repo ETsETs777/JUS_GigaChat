@@ -13,9 +13,35 @@ const Login: React.FC = () => {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  
+  const validateForm = () => {
+    let isValid = true;
+    setLoginError(null);
+    setPasswordError(null);
+    
+    if (login.trim().length < 3) {
+      setLoginError("Логин должен содержать минимум 3 символа");
+      isValid = false;
+    }
+    
+    if (password.length < 6) {
+      setPasswordError("Пароль должен содержать минимум 6 символов");
+      isValid = false;
+    }
+    
+    return isValid;
+  };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     const resultAction = await dispatch(loginUser({ login, password }));
     if (loginUser.fulfilled.match(resultAction)) {
       router.push("/home");
@@ -49,26 +75,29 @@ const Login: React.FC = () => {
             <input
               type="text"
               placeholder="Логин"
-              className={`${styles.input} ${error ? styles.error : ""}`}
+              className={`${styles.input} ${error || loginError ? styles.error : ""}`}
               value={login}
               onChange={(e) => {
                 setLogin(e.target.value);
                 setError(null);
+                setLoginError(null);
               }}
               required
             />
+            {loginError && <p className={styles.errorMessage}>{loginError}</p>}
             <input
               type="password"
               placeholder="Пароль"
-              className={`${styles.input} ${error ? styles.error : ""}`}
+              className={`${styles.input} ${error || passwordError ? styles.error : ""}`}
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
                 setError(null);
+                setPasswordError(null);
               }}
               required
             />
-
+            {passwordError && <p className={styles.errorMessage}>{passwordError}</p>}
             {error && <p className={styles.errorMessage}>{error}</p>}
             <button type="submit" className={styles.button}>Войти</button>
           </form>

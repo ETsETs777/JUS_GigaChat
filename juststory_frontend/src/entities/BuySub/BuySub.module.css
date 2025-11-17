@@ -126,3 +126,82 @@
     width: 100%;
   }
 }
+
+.purchaseButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.confirmModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.confirmModal {
+  background-color: #1a1a1a;
+  color: white;
+  padding: 30px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  border: 1px solid #6b46c1;
+}
+
+.confirmModalTitle {
+  color: #6b46c1;
+  font-size: 24px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.confirmModalText {
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.confirmModalButtons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.confirmButton {
+  background-color: #6b46c1;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.confirmButton:hover {
+  background-color: #805ad5;
+}
+
+.cancelButton {
+  background-color: #242424;
+  color: white;
+  border: 1px solid #6b46c1;
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.cancelButton:hover {
+  background-color: #6b46c1;
+  color: white;
+}

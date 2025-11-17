@@ -25,18 +25,42 @@ const initialState: UserState = {
 export const registerUser = createAsyncThunk<
   { login: string },
   { login: string; password: string }
->("user/register", async (userData) => {
-  const response = await axios.post(`${backendApiUrl}/user/register`, userData);
-  return response.data;
+>("user/register", async (userData, { rejectWithValue }) => {
+  try {
+    const response = await axios.post(`${backendApiUrl}/user/register`, userData, {
+      timeout: 10000,
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.code === 'ECONNABORTED' || error.message === 'Network Error') {
+        return rejectWithValue("Сервер недоступен. Проверьте подключение к интернету.");
+      }
+      return rejectWithValue(error.response?.data?.message || "Ошибка регистрации");
+    }
+    return rejectWithValue("Произошла неизвестная ошибка");
+  }
 });
 
 export const loginUser = createAsyncThunk<
   { login: string },
   { login: string; password: string }
->("user/login", async (userData) => {
-  const response = await axios.post(`${backendApiUrl}/user/login`, userData);
-  Cookies.set("token", response.data.token);
-  return response.data;
+>("user/login", async (userData, { rejectWithValue }) => {
+  try {
+    const response = await axios.post(`${backendApiUrl}/user/login`, userData, {
+      timeout: 10000,
+    });
+    Cookies.set("token", response.data.token);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.code === 'ECONNABORTED' || error.message === 'Network Error') {
+        return rejectWithValue("Сервер недоступен. Проверьте подключение к интернету.");
+      }
+      return rejectWithValue(error.response?.data?.message || "Ошибка входа");
+    }
+    return rejectWithValue("Произошла неизвестная ошибка");
+  }
 });
 
 // Новый thunk для получения данных пользователя

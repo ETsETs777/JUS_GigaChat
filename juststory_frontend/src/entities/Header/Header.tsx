@@ -12,15 +12,35 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const token = Cookies.get("token");
-    if (token) {
-      validateToken(token).then((valid) => {
+    const checkToken = async () => {
+      const token = Cookies.get("token");
+      if (token) {
+        const valid = await validateToken(token);
         setIsTokenValid(valid);
+        if (!valid) {
+          Cookies.remove("token");
+        }
         setIsLoading(false);
-      });
-    } else {
-      setIsLoading(false);
-    }
+      } else {
+        setIsLoading(false);
+      }
+    };
+    
+    checkToken();
+    
+    const interval = setInterval(() => {
+      const token = Cookies.get("token");
+      if (token) {
+        validateToken(token).then((valid) => {
+          if (!valid) {
+            setIsTokenValid(false);
+            Cookies.remove("token");
+          }
+        });
+      }
+    }, 60000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const toggleMobileMenu = () => {

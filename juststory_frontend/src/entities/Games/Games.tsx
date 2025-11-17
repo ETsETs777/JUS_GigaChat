@@ -12,7 +12,7 @@ import { validateToken } from '@/src/utils/validateToken'
 import Cookies from 'js-cookie'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styles from './Games.module.css'
 
@@ -29,8 +29,16 @@ const Games = () => {
 
 	const [userScripts, setUserScripts] = useState<GameCard[]>([])
 	const [query, setQuery] = useState('')
+	const [debouncedQuery, setDebouncedQuery] = useState('')
 	const [activeCategory, setActiveCategory] = useState<string>('Все')
 	const script = useSelector((state: RootState) => state.games.script)
+
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setDebouncedQuery(query)
+		}, 300)
+		return () => clearTimeout(timer)
+	}, [query])
 
 	// Загружаем состояние из Local Storage при монтировании компонента
 	useEffect(() => {
@@ -128,11 +136,11 @@ const Games = () => {
 	
 	const filteredCards = useMemo(() => {
 		return mergedCards.filter((card: GameCard) => {
-			const byQuery = query.trim().length === 0 || card.text.toLowerCase().includes(query.toLowerCase())
+			const byQuery = debouncedQuery.trim().length === 0 || card.text.toLowerCase().includes(debouncedQuery.toLowerCase())
 			const byCategory = activeCategory === 'Все' || (card.category ? card.category === activeCategory : true)
 			return byQuery && byCategory
 		})
-	}, [mergedCards, query, activeCategory])
+	}, [mergedCards, debouncedQuery, activeCategory])
 
 	return (
 		<div className={styles.container}>

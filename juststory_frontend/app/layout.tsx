@@ -3,20 +3,15 @@ import localFont from "next/font/local";
 import "./globals.css";
 import StoreProvider from "./StoreProvider";
 
-const geistSans = localFont({
+const butlerFont = localFont({
   src: "./fonts/Butler.woff",
   variable: "--font-butler",
   weight: "100 900",
 });
 
-const geistMono = localFont({
-  src: "./fonts/Butler.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
 const monomakh = localFont({
   src: "./fonts/Dusha V5 Regular.ttf",
-  variable: "--font-geist-monomakh",
+  variable: "--font-monomakh",
   weight: "100 900",
 });
 
@@ -41,7 +36,7 @@ export default function RootLayout({
     <html lang="en">
       <StoreProvider>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} ${monomakh.variable} antialiased`}
+          className={`${butlerFont.variable} ${monomakh.variable} antialiased`}
         >
           {children ? children : null}
         </body>

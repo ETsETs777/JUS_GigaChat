@@ -22,27 +22,54 @@ const initialState: AIState = {
 // Асинхронное действие для получения действий
 export const getActions = createAsyncThunk<string[], string>(
   "ai/getActions",
-  async (message) => {
-    const response = await axios.post(`${backendApiUrl}/ai/get-actions`, {
-      message,
-    });
-    console.log("getActions response:", response.data); // Логируем ответ
-    return response.data.split("!"); // Разделяем ответ по восклицательному знаку
+  async (message, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${backendApiUrl}/ai/get-actions`,
+        {
+          message,
+        },
+        {
+          timeout: 15000,
+        }
+      );
+      return response.data.split("!");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.code === 'ECONNABORTED' || error.message === 'Network Error') {
+          return rejectWithValue("Сервер недоступен. Проверьте подключение к интернету.");
+        }
+        return rejectWithValue(error.response?.data?.message || "Ошибка при получении действий");
+      }
+      return rejectWithValue("Произошла неизвестная ошибка");
+    }
   }
 );
 
 // Асинхронное действие для отправки первого сообщения
 export const sendMessageFirst = createAsyncThunk<string, string>(
   "ai/sendMessageFirst",
-  async (message) => {
-    const response = await axios.post(
-      `${backendApiUrl}/ai/send-message-start`,
-      {
-        message,
+  async (message, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${backendApiUrl}/ai/send-message-start`,
+        {
+          message,
+        },
+        {
+          timeout: 30000,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.code === 'ECONNABORTED' || error.message === 'Network Error') {
+          return rejectWithValue("Сервер недоступен. Проверьте подключение к интернету.");
+        }
+        return rejectWithValue(error.response?.data?.message || "Ошибка при отправке сообщения");
       }
-    );
-    console.log("sendMessageFirst response:", response.data); // Логируем ответ
-    return response.data; // Возвращаем ответ от сервера
+      return rejectWithValue("Произошла неизвестная ошибка");
+    }
   }
 );
 
@@ -50,13 +77,28 @@ export const sendMessageFirst = createAsyncThunk<string, string>(
 export const sendMessage = createAsyncThunk<
   string,
   { message: string; prompt: string }
->("ai/sendMessage", async ({ message, prompt }) => {
-  const response = await axios.post(`${backendApiUrl}/ai/send-message`, {
-    message,
-    prompt,
-  });
-  console.log("sendMessage response:", response.data); // Логируем ответ
-  return response.data; // Возвращаем ответ от сервера
+>("ai/sendMessage", async ({ message, prompt }, { rejectWithValue }) => {
+  try {
+    const response = await axios.post(
+      `${backendApiUrl}/ai/send-message`,
+      {
+        message,
+        prompt,
+      },
+      {
+        timeout: 30000,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.code === 'ECONNABORTED' || error.message === 'Network Error') {
+        return rejectWithValue("Сервер недоступен. Проверьте подключение к интернету.");
+      }
+      return rejectWithValue(error.response?.data?.message || "Ошибка при отправке сообщения");
+    }
+    return rejectWithValue("Произошла неизвестная ошибка");
+  }
 });
 
 // Асинхронное действие для генерации изображения
@@ -95,11 +137,12 @@ const aiSlice = createSlice({
       })
       .addCase(sendMessageFirst.fulfilled, (state, action) => {
         state.loading = false;
-        state.message = action.payload; // Сохраняем полученное сообщение
+        state.message = action.payload;
+        state.error = null;
       })
       .addCase(sendMessageFirst.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Ошибка отправки сообщения";
+        state.error = typeof action.payload === 'string' ? action.payload : (action.error.message || "Ошибка отправки сообщения");
       })
       .addCase(sendMessage.pending, (state) => {
         state.loading = true;
@@ -107,11 +150,11 @@ const aiSlice = createSlice({
       })
       .addCase(sendMessage.fulfilled, (state, action) => {
         state.loading = false;
-        // Здесь можно обработать ответ, если нужно
+        state.error = null;
       })
       .addCase(sendMessage.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Ошибка отправки сообщения";
+        state.error = typeof action.payload === 'string' ? action.payload : (action.error.message || "Ошибка отправки сообщения");
       })
       .addCase(generateImage.pending, (state) => {
         state.loading = true;

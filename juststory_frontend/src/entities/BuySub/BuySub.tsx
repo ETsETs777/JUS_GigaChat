@@ -42,11 +42,31 @@ const BuySub: React.FC = () => {
     setSelectedSubscriptionId(id);
   };
 
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
   const handlePurchase = async () => {
     const token = Cookies.get("token");
     if (!token || selectedSubscriptionId === null) {
       return alert("Пожалуйста, выберите подписку и войдите в систему.");
     }
+    
+    const selectedSub = subscriptions.find(sub => sub.id === selectedSubscriptionId);
+    if (!selectedSub) {
+      return alert("Выбранная подписка не найдена.");
+    }
+    
+    setShowConfirmModal(true);
+  };
+
+  const confirmPurchase = async () => {
+    const token = Cookies.get("token");
+    if (!token || selectedSubscriptionId === null) {
+      return;
+    }
+    
+    setShowConfirmModal(false);
+    setLoading(true);
+    
     try {
       const response = await axios.post(
         `${backendApiUrl}/subscription/purchase/${selectedSubscriptionId}`,
@@ -57,10 +77,9 @@ const BuySub: React.FC = () => {
           },
         }
       );
-      console.log(response);
       if (response.status === 201) {
         alert("Подписка успешно приобретена!");
-        router.push("/profile"); // Перенаправление на страницу профиля
+        router.push("/profile");
       } else {
         alert("Ошибка при покупке подписки: " + response.data.message);
       }
@@ -69,6 +88,8 @@ const BuySub: React.FC = () => {
         ? error.message 
         : (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "Неизвестная ошибка";
       alert("Ошибка при покупке подписки: " + errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -104,10 +125,29 @@ const BuySub: React.FC = () => {
             </div>
           ))}
         </div>
-        <button className={styles.purchaseButton} onClick={handlePurchase}>
-          Купить подписку
+        <button className={styles.purchaseButton} onClick={handlePurchase} disabled={loading || selectedSubscriptionId === null}>
+          {loading ? "Обработка..." : "Купить подписку"}
         </button>
       </div>
+      {showConfirmModal && selectedSubscriptionId && (
+        <div className={styles.confirmModalOverlay} onClick={() => setShowConfirmModal(false)}>
+          <div className={styles.confirmModal} onClick={(e) => e.stopPropagation()}>
+            <h2 className={styles.confirmModalTitle}>Подтверждение покупки</h2>
+            <p className={styles.confirmModalText}>
+              Вы уверены, что хотите приобрести подписку "{subscriptions.find(s => s.id === selectedSubscriptionId)?.name}" 
+              за {subscriptions.find(s => s.id === selectedSubscriptionId)?.price} руб.?
+            </p>
+            <div className={styles.confirmModalButtons}>
+              <button className={styles.confirmButton} onClick={confirmPurchase}>
+                Подтвердить
+              </button>
+              <button className={styles.cancelButton} onClick={() => setShowConfirmModal(false)}>
+                Отмена
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
